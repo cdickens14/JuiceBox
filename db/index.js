@@ -4,11 +4,11 @@ const client = new Client('postgres://localhost:5432/juicebox-dev');
 const createUser = async({ id, username, password, name, location }) => {
     try {
         const { rows: [ user ] } = await client.query(`
-        INSERT INTO users (id, username, name, password, location) 
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO users (username, name, password, location) 
+        VALUES ($1, $2, $3, $4)
         ON CONFLICT (username) DO NOTHING
         RETURNING *;
-        `, [ id, username, name, password, location]);
+        `, [ username, name, password, location]);
         return user;
     } catch(err) {
       throw err;
@@ -61,6 +61,18 @@ const getUserById = async (userId) => {
     }
 }
 
+const getUserByUsername = async(username) => {
+    try {
+        const { rows: [user] } = await client.query(`
+        SELECT *
+        FROM users
+        WHERE username=$1;
+        `, [username]);
+        return user;
+    } catch (err) {
+      throw err;
+    }
+}
 const createPost = async({ 
     authorId, 
     title, 
@@ -289,5 +301,6 @@ module.exports = {
     getAllTags,
     createPostTag,
     getPostById,
-    getPostsByTagName
+    getPostsByTagName,
+    getUserByUsername,
 }
