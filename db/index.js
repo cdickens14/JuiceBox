@@ -158,6 +158,13 @@ const getPostById = async(postId) => {
         WHERE id = $1;
         `, [postId]);
 
+        if (!post) {
+            throw {
+                name: "PostNotFoundError",
+                message: "Could not find a post with that postId"
+            };
+        }
+
         const { rows: tags } = await client.query(`
         SELECT tags.*
         FROM tags
@@ -207,7 +214,7 @@ const getPostsByTagName = async(tagName) => {
         FROM posts
         JOIN post_tags ON posts.id=post_tags."postId"
         JOIN tags ON tags.id=post_tags."tagId"
-        WHERE tagsname=$1;
+        WHERE tags.name=$1;
         `, [tagName]);
 
         return await Promise.all(postIds.map(
